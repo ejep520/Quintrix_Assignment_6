@@ -21,7 +21,7 @@ import com.quintrix.jepsen.erik.sixth.model.Person;
 @RestController // Fun fact: @RestController annotation includes @ResponseBody as part of its
                 // definition, making subsequent @ResponseBody annotations within the
                 // @RestController redundant.
-public class HomeController {
+public class RobertController {
   private HttpHeaders httpPostHeaders;
   private RestTemplate restTemplate;
   private SimpleClientHttpRequestFactory simpleClientHttpRequestFactory;
@@ -29,7 +29,7 @@ public class HomeController {
   @Value("${sixth.baseUri}")
   private String baseUri;
 
-  public HomeController() {
+  public RobertController() {
     simpleClientHttpRequestFactory = new SimpleClientHttpRequestFactory();
     simpleClientHttpRequestFactory.setReadTimeout(5000);
     simpleClientHttpRequestFactory.setConnectTimeout(5000);
@@ -39,30 +39,19 @@ public class HomeController {
   }
 
   @GetMapping("/robert/find")
-  public String robertFind() {
-    Person[] people = restTemplate.getForObject(baseUri + "/person/first/robert", Person[].class);
-    String reply = "";
-    for (int i = 0; i < people.length; i++) {
-      reply += people[i].toString();
-      if (i < people.length - 1)
-        reply += System.lineSeparator();
-    }
-    return reply;
+  public Person[] robertFind() {
+    return restTemplate.getForObject(baseUri + "/person/first/robert", Person[].class);
   }
 
   @GetMapping("/robert/add")
-  public ResponseEntity<String> robertAdd() {
+  public Person robertAdd() {
     MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
     map.add("fName", "Robert");
     map.add("lName", "Johnson\", -1); DROP TABLE persons;");
     map.add("deptId", "3");
 
-    HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity<>(map, httpPostHeaders);
-    ResponseEntity<String> response =
-        restTemplate.postForEntity(baseUri + "/person/new", httpEntity, String.class);
-    if (response.getBody().equals("Success"))
-      return response;
-    return new ResponseEntity<String>("Fail", HttpStatus.NOT_ACCEPTABLE);
+    return restTemplate.postForObject(baseUri + "/person/new",
+        new HttpEntity<MultiValueMap<String, String>>(map, httpPostHeaders), Person.class);
   }
 
   @GetMapping("/robert/fail")
@@ -70,10 +59,10 @@ public class HomeController {
     MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
     map.add("fName", "Robert");
 
-    HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity<>(map, httpPostHeaders);
     ResponseEntity<String> response;
     try {
-      response = restTemplate.postForEntity(baseUri + "/person/new", httpEntity, String.class);
+      response = restTemplate.postForEntity(baseUri + "/person/new",
+          new HttpEntity<MultiValueMap<String, String>>(map, httpPostHeaders), String.class);
     } catch (HttpClientErrorException e) {
       String reply = e.getLocalizedMessage() + System.lineSeparator();
       for (StackTraceElement element : e.getStackTrace()) {
@@ -95,10 +84,9 @@ public class HomeController {
   }
 
   @GetMapping("/robert/rename/{id}/{lName}")
-  public String robertRename(@PathVariable Integer id, @PathVariable String lName) {
+  public Person robertRename(@PathVariable Integer id, @PathVariable String lName) {
     MultiValueMap<String, String> map;
     HttpEntity<MultiValueMap<String, String>> requestEntity;
-    String response;
 
     map = new LinkedMultiValueMap<String, String>();
     map.add("lName", lName);
@@ -106,6 +94,6 @@ public class HomeController {
     requestEntity = new HttpEntity<>(map, httpPostHeaders);
 
     return restTemplate.patchForObject(baseUri + "/person/" + id.toString() + "/last",
-        requestEntity, String.class);
+        requestEntity, Person.class);
   }
 }
