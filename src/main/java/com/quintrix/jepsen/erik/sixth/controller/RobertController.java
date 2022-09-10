@@ -3,10 +3,9 @@ package com.quintrix.jepsen.erik.sixth.controller;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quintrix.jepsen.erik.sixth.model.Person;
 
 
@@ -24,16 +25,18 @@ import com.quintrix.jepsen.erik.sixth.model.Person;
 public class RobertController {
   private HttpHeaders httpPostHeaders;
   private RestTemplate restTemplate;
-  private SimpleClientHttpRequestFactory simpleClientHttpRequestFactory;
 
   @Value("${sixth.baseUri}")
   private String baseUri;
+  @Value("${sixth.maxTimeout}")
+  private int maxTimeout;
 
   public RobertController() {
-    simpleClientHttpRequestFactory = new SimpleClientHttpRequestFactory();
-    simpleClientHttpRequestFactory.setReadTimeout(5000);
-    simpleClientHttpRequestFactory.setConnectTimeout(5000);
-    restTemplate = new RestTemplate(simpleClientHttpRequestFactory);
+    HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+    factory.setConnectTimeout(maxTimeout);
+    factory.setReadTimeout(maxTimeout);
+    restTemplate = new RestTemplate();
+    restTemplate.setRequestFactory(factory);
     httpPostHeaders = new HttpHeaders();
     httpPostHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
   }
@@ -44,32 +47,40 @@ public class RobertController {
   }
 
   @GetMapping("/robert/add")
-  public Person robertAdd() {
+  public ResponseEntity<Person> robertAdd() {
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+    ObjectMapper objectMapper = new ObjectMapper();
     MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-    map.add("fName", "Robert");
-    map.add("lName", "Johnson\", -1); DROP TABLE persons;");
-    map.add("deptId", "3");
-
-    return restTemplate.postForObject(baseUri + "/person/new",
-        new HttpEntity<MultiValueMap<String, String>>(map, httpPostHeaders), Person.class);
+    Person newRobby = new Person("Robert", "Johnson\", -1); DROP TABLE persons;", -1, 3);
+    try {
+      map.add("person", objectMapper.writeValueAsString(newRobby));
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
+    HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity<>(map, httpHeaders);
+    return restTemplate.postForEntity(baseUri + "/person/new", httpEntity, Person.class);
   }
 
   @GetMapping("/robert/fail")
   public ResponseEntity<String> robertFail() {
+    ResponseEntity<String> response;
+
     MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
     map.add("fName", "Robert");
 
-    ResponseEntity<String> response;
     try {
       response = restTemplate.postForEntity(baseUri + "/person/new",
           new HttpEntity<MultiValueMap<String, String>>(map, httpPostHeaders), String.class);
     } catch (HttpClientErrorException e) {
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.setContentType(MediaType.TEXT_PLAIN);
       String reply = e.getLocalizedMessage() + System.lineSeparator();
       for (StackTraceElement element : e.getStackTrace()) {
         reply += element.toString();
         reply += System.lineSeparator();
       }
-      response = new ResponseEntity<String>(reply, HttpStatus.NOT_ACCEPTABLE);
+      response = new ResponseEntity<String>(reply, httpHeaders, e.getStatusCode());
     }
     return response;
   }
@@ -93,7 +104,7 @@ public class RobertController {
 
     requestEntity = new HttpEntity<>(map, httpPostHeaders);
 
-    return restTemplate.patchForObject(baseUri + "/person/" + id.toString() + "/last",
+    return restTemplate.patchForObject(baseUri + "/person/" + id.toString() + "/lastName",
         requestEntity, Person.class);
   }
 }

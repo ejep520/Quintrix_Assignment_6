@@ -1,0 +1,6 @@
+server:
+  port: 9890
+
+sixth:
+  baseUri: http://www.example.com:9811
+  maxTimeout: 2500

@@ -11,12 +11,17 @@
 	<groupId>com.quintrix.jepsen.erik</groupId>
 	<artifactId>sixth</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>fifthA project</name>
-	<description>Another rabbit hole for me to go down.</description>
+	<name>Sixth project</name>
+	<description>The sixth Quintrix assignment</description>
 	<properties>
 		<java.version>1.8</java.version>
 	</properties>
 	<dependencies>
+	   <dependency>
+	       <groupId>org.apache.httpcomponents</groupId>
+	       <artifactId>httpclient</artifactId>
+	       <scope>runtime</scope>
+	   </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>

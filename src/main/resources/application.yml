@@ -1,5 +1,3 @@
-server:
-  port: 8888
-
-sixth:
-  baseUri: http://localhost:8080
+spring:
+  profiles:
+    active: dev
