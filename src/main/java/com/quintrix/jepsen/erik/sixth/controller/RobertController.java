@@ -5,7 +5,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +15,8 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.quintrix.jepsen.erik.sixth.client.SixthClient;
+import com.quintrix.jepsen.erik.sixth.model.Department;
 import com.quintrix.jepsen.erik.sixth.model.Person;
 
 
@@ -24,26 +25,22 @@ import com.quintrix.jepsen.erik.sixth.model.Person;
                 // @RestController redundant.
 public class RobertController {
   private HttpHeaders httpPostHeaders;
+  private SixthClient client;
   private RestTemplate restTemplate;
-
   @Value("${sixth.baseUri}")
   private String baseUri;
-  @Value("${sixth.maxTimeout}")
-  private int maxTimeout;
 
   public RobertController() {
-    HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
-    factory.setConnectTimeout(maxTimeout);
-    factory.setReadTimeout(maxTimeout);
-    restTemplate = new RestTemplate();
-    restTemplate.setRequestFactory(factory);
     httpPostHeaders = new HttpHeaders();
     httpPostHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+    client = new SixthClient();
+    restTemplate = client.getRestTemplate();
   }
 
   @GetMapping("/robert/find")
   public Person[] robertFind() {
-    return restTemplate.getForObject(baseUri + "/person/first/robert", Person[].class);
+    Person[] response = client.getForObject(baseUri + "/person/first/robert", Person[].class);
+    return response;
   }
 
   @GetMapping("/robert/add")
@@ -52,7 +49,8 @@ public class RobertController {
     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
     ObjectMapper objectMapper = new ObjectMapper();
     MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-    Person newRobby = new Person("Robert", "Johnson\", -1); DROP TABLE persons;", -1, 3);
+    Department dept = new Department("Administration", 3);
+    Person newRobby = new Person("Robert", "Johnson\", -1); DROP TABLE persons;", -1, dept);
     try {
       map.add("person", objectMapper.writeValueAsString(newRobby));
     } catch (JsonProcessingException e) {

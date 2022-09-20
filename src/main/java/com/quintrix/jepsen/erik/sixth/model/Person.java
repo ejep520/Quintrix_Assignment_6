@@ -5,26 +5,26 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({"personId", "fName", "lName", "deptId"})
+@JsonPropertyOrder({"personId", "fName", "lName", "dept"})
 public class Person {
-  @JsonProperty("fName")
-  private String fName;
-  @JsonProperty("lName")
-  private String lName;
+  @JsonProperty("fname")
+  private String fname;
+  @JsonProperty("lname")
+  private String lname;
   @JsonProperty("personId")
   private Integer personId;
-  @JsonProperty("deptId")
-  private Integer deptId;
+  @JsonProperty("dept")
+  private Department dept;
 
   public Person() {
     super();
   }
 
-  public Person(String fName, String lName, int personId, int deptId) {
+  public Person(String fname, String lname, int personId, Department dept) {
     super();
-    this.fName = fName;
-    this.lName = lName;
-    this.deptId = deptId;
+    this.fname = fname;
+    this.lname = lname;
+    this.dept = dept;
     this.personId = personId;
   }
 
@@ -33,34 +33,34 @@ public class Person {
     return personId;
   }
 
-  @JsonProperty("fName")
-  public String getfName() {
-    return fName;
+  @JsonProperty("fname")
+  public String getfname() {
+    return fname;
   }
 
-  @JsonProperty("lName")
-  public String getlName() {
-    return lName;
+  @JsonProperty("lname")
+  public String getlname() {
+    return lname;
   }
 
-  @JsonProperty("deptId")
-  public Integer getDeptId() {
-    return deptId;
+  @JsonProperty("dept")
+  public Department getDept() {
+    return dept;
   }
 
-  @JsonProperty("fName")
-  public void setfName(String fName) {
-    this.fName = fName;
+  @JsonProperty("fname")
+  public void setfname(String fname) {
+    this.fname = fname;
   }
 
-  @JsonProperty("lName")
-  public void setlName(String lName) {
-    this.lName = lName;
+  @JsonProperty("lname")
+  public void setlname(String lname) {
+    this.lname = lname;
   }
 
-  @JsonProperty("deptId")
-  public void setDeptId(Integer deptId) {
-    this.deptId = deptId;
+  @JsonProperty("dept")
+  public void setDept(Department dept) {
+    this.dept = dept;
   }
 
   public boolean equals(Object b) {
@@ -68,9 +68,9 @@ public class Person {
       return false;
     if (b.getClass() != Person.class)
       return false;
-    return (this.fName.equals(((Person) b).getfName()))
-        && (this.lName.equals(((Person) b).getlName()))
-        && (this.deptId.equals(((Person) b).getDeptId()));
+    return (this.fname.equals(((Person) b).getfname()))
+        && (this.lname.equals(((Person) b).getlname()))
+        && (this.dept.equals(((Person) b).getDept()));
   }
 
   @JsonProperty("personId")
@@ -79,6 +79,6 @@ public class Person {
   }
 
   public String toString() {
-    return String.format("%d. %s %s (dept %d)", personId, fName, lName, deptId);
+    return String.format("%d. %s %s (dept %d)", personId, fname, lname, dept.getDeptNumber());
   }
 }

@@ -1,6 +1,8 @@
+debug: true
+
 server:
   port: 8888
 
 sixth:
   baseUri: http://localhost:8080
-  maxTimeout: 5000
+  maxTimeout: 500
