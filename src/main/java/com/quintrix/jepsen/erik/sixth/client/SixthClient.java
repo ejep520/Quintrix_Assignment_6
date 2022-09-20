@@ -1,34 +1,29 @@
 package com.quintrix.jepsen.erik.sixth.client;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.circuitbreaker.springretry.SpringRetryCircuitBreakerFactory;
-import org.springframework.cloud.circuitbreaker.springretry.SpringRetryConfigBuilder;
+import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JCircuitBreakerFactory;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.retry.policy.TimeoutRetryPolicy;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+@Service
 public class SixthClient {
-  private SpringRetryCircuitBreakerFactory circuitBreakerFactory;
-  @Autowired
+  private Resilience4JCircuitBreakerFactory circuitBreakerFactory;
   private RestTemplate restTemplate;
   @Value("${sixth.maxTimeout}")
   private int maxTimeout;
 
-  public SixthClient() {
+  public SixthClient(Resilience4JCircuitBreakerFactory circuitBreakerFactory) {
+    this.circuitBreakerFactory = circuitBreakerFactory;
     restTemplate = new RestTemplate();
     restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
-    circuitBreakerFactory = new SpringRetryCircuitBreakerFactory();
-    circuitBreakerFactory.configureDefault(
-        id -> new SpringRetryConfigBuilder(id).retryPolicy(new TimeoutRetryPolicy()).build());
   }
 
-  @SuppressWarnings("unchecked")
-  public <T> T getForObject(String uri, Class<T> responseType) {
-    CircuitBreaker circuitBreaker = circuitBreakerFactory.create("getUri");
+  public <T> T getForObject(String uri, Class<T> responseType, T thrown) {
+    CircuitBreaker circuitBreaker = circuitBreakerFactory.create("default");
     return (T) circuitBreaker.run(() -> restTemplate.getForObject(uri, responseType),
-        throwable -> "fallback");
+        throwable -> thrown);
   }
 
   public RestTemplate getRestTemplate() {

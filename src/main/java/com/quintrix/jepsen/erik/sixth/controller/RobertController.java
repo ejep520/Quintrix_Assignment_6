@@ -30,16 +30,18 @@ public class RobertController {
   @Value("${sixth.baseUri}")
   private String baseUri;
 
-  public RobertController() {
+  public RobertController(SixthClient client) {
+    this.client = client;
     httpPostHeaders = new HttpHeaders();
     httpPostHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-    client = new SixthClient();
-    restTemplate = client.getRestTemplate();
+    restTemplate = this.client.getRestTemplate();
   }
 
   @GetMapping("/robert/find")
   public Person[] robertFind() {
-    Person[] response = client.getForObject(baseUri + "/person/first/robert", Person[].class);
+    Person[] response =
+        client.getForObject(baseUri + "/person/first/robert", Person[].class, new Person[] {
+            new Person("Joseph R.", "Person", -1, new Department("Error Department", -1))});
     return response;
   }
 
