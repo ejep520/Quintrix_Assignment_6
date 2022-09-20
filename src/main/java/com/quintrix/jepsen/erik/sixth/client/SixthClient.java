@@ -1,6 +1,5 @@
 package com.quintrix.jepsen.erik.sixth.client;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JCircuitBreakerFactory;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -11,8 +10,6 @@ import org.springframework.web.client.RestTemplate;
 public class SixthClient {
   private Resilience4JCircuitBreakerFactory circuitBreakerFactory;
   private RestTemplate restTemplate;
-  @Value("${sixth.maxTimeout}")
-  private int maxTimeout;
 
   public SixthClient(Resilience4JCircuitBreakerFactory circuitBreakerFactory) {
     this.circuitBreakerFactory = circuitBreakerFactory;

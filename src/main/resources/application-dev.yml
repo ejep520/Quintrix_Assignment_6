@@ -5,4 +5,3 @@ server:
 
 sixth:
   baseUri: http://localhost:8080
-  maxTimeout: 500
