@@ -68,6 +68,8 @@ public class Person {
       return false;
     if (b.getClass() != Person.class)
       return false;
+    if (dept == null)
+      return ((Person) b).getDept() == null;
     return (this.fname.equals(((Person) b).getfname()))
         && (this.lname.equals(((Person) b).getlname()))
         && (this.dept.equals(((Person) b).getDept()));
