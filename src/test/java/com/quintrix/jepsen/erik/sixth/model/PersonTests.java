@@ -34,11 +34,12 @@ public class PersonTests {
     Assertions.assertFalse(person0.equals(null));
   }
 
+  @SuppressWarnings("unlikely-arg-type")
   @Test
   public void GivenPersonAndAnotherClass_WhenTestedForEquality_ReturnFalse() {
     Person person0 = new Person();
     person0.setfname(fName);
     person0.setlname(lName);
-    Assertions.assertFalse(person0.equals(fName + " " + lName));
+    Assertions.assertFalse(person0.equals(fName));
   }
 }
